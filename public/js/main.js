@@ -132,22 +132,31 @@
     
     let html = '<div class="result-card">';
     
-    // Video Preview untuk video (tanpa suara/muted) - PASTI MUNCUL
+    // Video Preview
     if (isVideo && data.download_url) {
       html += `
         <div class="video-preview-container" onclick="window.open('${data.download_url}', '_blank')">
           <video class="video-preview" muted autoplay loop playsinline disablePictureInPicture>
-            <source src="${data.download_url}?preview=1" type="video/mp4">
-            <img src="/assets/logo.png" alt="Preview not available">
+            <source src="${data.download_url}" type="video/mp4">
           </video>
-          <div class="video-preview-control">
-            <i class="fas fa-play"></i> Preview (tanpa suara) • Klik untuk download
-          </div>
+          <div class="video-preview-control"><i class="fas fa-play"></i> Preview • Klik untuk download</div>
         </div>
       `;
     }
     
-    // Video Info
+    // Audio Player untuk preview lagu
+    if (isAudio && data.download_url) {
+      html += `
+        <div class="audio-player-container">
+          <audio controls class="audio-preview" preload="metadata">
+            <source src="${data.download_url}" type="audio/mpeg">
+          </audio>
+          <div class="audio-info"><i class="fas fa-headphones"></i> Preview lagu • Klik play untuk mendengarkan</div>
+        </div>
+      `;
+    }
+    
+    // Info
     html += `
       <div class="result-info">
         <div class="result-title">${escapeHtml(vi.title || (isVideo ? 'TikTok Video' : isAudio ? 'TikTok Audio' : 'TikTok Content'))}</div>
@@ -178,12 +187,10 @@
     resultDiv.classList.remove('hidden');
     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     
-    // Play video setelah render
+    // Autoplay video
     setTimeout(() => {
       const video = document.querySelector('.video-preview');
-      if (video) {
-        video.play().catch(e => console.log('Auto-play prevented:', e));
-      }
+      if (video) video.play().catch(e => console.log('Auto-play prevented'));
     }, 100);
   }
   
@@ -205,20 +212,23 @@
       </div>
     `;
     
-    // Images Grid - Responsive untuk mobile
+    // Images Grid dengan tombol download per gambar
     if (images.length > 0) {
       html += `<div class="slideshow-section">`;
-      html += `<div class="slideshow-grid" id="slideshowGrid">`;
+      html += `<div class="slideshow-grid">`;
       images.forEach((img, idx) => {
         html += `
-          <div class="slideshow-card" onclick="window.open('${img}', '_blank')">
+          <div class="slideshow-card">
             <img src="${img}" alt="Photo ${idx + 1}" loading="lazy">
             <div class="photo-number">${idx + 1}/${images.length}</div>
+            <a href="${img}" class="photo-download-btn" download target="_blank">
+              <i class="fas fa-download"></i> Download
+            </a>
           </div>
         `;
       });
       html += `</div>`;
-      html += `<div class="slideshow-note"><i class="fas fa-info-circle"></i> Klik gambar untuk melihat/menyimpan • ${images.length} foto tanpa watermark</div>`;
+      html += `<div class="slideshow-note"><i class="fas fa-info-circle"></i> Klik tombol Download di bawah setiap gambar untuk menyimpan • ${images.length} foto tanpa watermark</div>`;
       html += `</div>`;
     }
     
