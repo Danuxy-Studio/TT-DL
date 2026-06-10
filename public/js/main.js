@@ -120,7 +120,12 @@
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (!res.ok || !data.success) throw new Error(data.error?.message || data.message || 'Request failed');
+    if (!res.ok || !data.success) {
+      const error = new Error(data.error?.message || data.message || 'Request failed');
+      error.code = data.error?.code || 'UNKNOWN';
+      error.detail = data.error;
+      throw error;
+    }
     return data.data;
   }
   
@@ -140,7 +145,9 @@
             <source src="${data.download_url}" type="video/mp4">
             Browser tidak support video preview.
           </video>
-          <div class="video-preview-control"><i class="fas fa-info-circle"></i> Preview video • Bisa langsung diputar</div>
+          <div class="video-preview-control">
+            <i class="fas fa-play"></i> Preview Video
+          </div>
         </div>
       `;
     }
@@ -158,7 +165,7 @@
             Browser tidak support audio player.
           </audio>
           <div class="audio-info">
-            <i class="fas fa-headphones"></i> Klik play untuk mendengarkan sebelum download
+            <i class="fas fa-headphones"></i> Play untuk mendengarkan sebelum download
           </div>
         </div>
       `;
@@ -242,22 +249,30 @@
     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
   
-  function displayError(msg, errorDetail = null) {
-    let errorMessage = msg;
+  function displayError(error) {
+    let errorMessage = error.message || 'Terjadi kesalahan';
     let suggestion = '';
+    let errorCode = error.code || '';
     
-    // Cek apakah ini error karena salah tipe konten
-    if (errorDetail && errorDetail.code === 'PHOTO_URL') {
-      errorMessage = 'Link ini adalah SLIDESHOW (foto). Gunakan tombol "Download Foto" untuk mengunduh gambar-gambarnya.';
-      suggestion = 'Coba klik tombol "Download Foto" di atas.';
-    } else if (errorDetail && errorDetail.code === 'VIDEO_URL') {
-      errorMessage = 'Link ini adalah VIDEO. Gunakan tombol "Download Video" untuk mengunduh videonya.';
-      suggestion = 'Coba klik tombol "Download Video" di atas.';
-    } else if (errorDetail && errorDetail.code === 'SERVER_ERROR') {
-      errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.';
-      suggestion = 'Jika error terus terjadi, hubungi kami melalui media sosial di bawah.';
-    } else if (errorDetail && errorDetail.code === 'UNKNOWN') {
-      errorMessage = errorDetail.message || 'Terjadi kesalahan. Silakan coba lagi.';
+    if (errorCode === 'PHOTO_URL') {
+      errorMessage = 'Link ini adalah slideshow (kumpulan foto)';
+      suggestion = 'Gunakan tombol "Download Foto" untuk mengunduh semua gambar.';
+    } 
+    else if (errorCode === 'VIDEO_URL') {
+      errorMessage = 'Link ini adalah video';
+      suggestion = 'Gunakan tombol "Download Video" untuk mengunduh videonya.';
+    } 
+    else if (errorCode === 'SERVER_ERROR') {
+      errorMessage = 'Terjadi kesalahan pada server';
+      suggestion = 'Silakan coba lagi dalam beberapa saat.';
+    }
+    else if (error.message && error.message.includes('URL TikTok tidak valid')) {
+      errorMessage = 'URL TikTok tidak valid';
+      suggestion = 'Pastikan URL yang Anda masukkan benar.';
+    }
+    else if (error.message && error.message.includes('Masukkan URL')) {
+      errorMessage = 'URL TikTok tidak boleh kosong';
+      suggestion = 'Silakan masukkan URL TikTok terlebih dahulu.';
     }
     
     let html = `
@@ -266,8 +281,15 @@
         <div>
           <strong>Error</strong><br>
           ${escapeHtml(errorMessage)}
-          ${suggestion ? `<br><span style="font-size:0.65rem;">${escapeHtml(suggestion)}</span>` : ''}
-          <br><span style="font-size:0.6rem; color:#6b7280;">Jika masalah berlanjut, hubungi kami melalui WhatsApp atau GitHub di footer.</span>
+          ${suggestion ? `<br><span class="error-suggestion">${escapeHtml(suggestion)}</span>` : ''}
+          <br><br>
+          <span class="error-contact">
+            <i class="fab fa-whatsapp"></i> Hubungi: 
+            <a href="https://whatsapp.com/channel/0029Vb6RsCAEAKWDFTrHdu0L" target="_blank">WhatsApp</a>
+            <span class="separator">•</span>
+            <i class="fab fa-github"></i> 
+            <a href="https://github.com/Danuxy-Studio" target="_blank">GitHub</a>
+          </span>
         </div>
       </div>
     `;
@@ -295,17 +317,7 @@
       completeProgress();
       setTimeout(() => {
         showLoading(false);
-        // Cek apakah err.message mengandung struktur error dari API
-        let errorDetail = null;
-        try {
-          // err.message mungkin berupa string JSON dari API
-          if (err.message && err.message.includes('code')) {
-            errorDetail = JSON.parse(err.message);
-          }
-        } catch(e) {
-          // ignore
-        }
-        displayError(err.message, errorDetail);
+        displayError(err);
         isProcessing = false;
       }, 500);
     }
@@ -330,13 +342,7 @@
       completeProgress();
       setTimeout(() => {
         showLoading(false);
-        let errorDetail = null;
-        try {
-          if (err.message && err.message.includes('code')) {
-            errorDetail = JSON.parse(err.message);
-          }
-        } catch(e) {}
-        displayError(err.message, errorDetail);
+        displayError(err);
         isProcessing = false;
       }, 500);
     }

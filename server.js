@@ -97,11 +97,14 @@ app.post('/api/tiktok/ttmp4', async (req, res) => {
         'Content-Type': 'application/json',
         'x-api-key': process.env.API_KEY
       },
-      timeout: 30000
+      timeout: 30000,
+      validateStatus: function(status) {
+        return status < 500; // Terima semua status selain 500
+      }
     });
 
-    // Jika sukses
-    if (response.data && response.data.success) {
+    // Jika sukses (status 200)
+    if (response.status === 200 && response.data && response.data.success === true) {
       const data = response.data.data;
       const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}&type=mp4`;
       
@@ -110,12 +113,15 @@ app.post('/api/tiktok/ttmp4', async (req, res) => {
         data: { ...data, download_url: proxyUrl, preview_url: proxyUrl }
       });
     } 
-    // Jika gagal (misal PHOTO_URL)
-    else if (response.data && !response.data.success) {
-      // Teruskan error dari API ke frontend
-      res.status(400).json({
+    // Jika API mengembalikan error (status 400 dengan success: false)
+    else if (response.data && response.data.success === false) {
+      // Kirim error dari API ke frontend dengan status yang sama
+      res.status(response.status || 400).json({
         success: false,
-        error: response.data.error || { code: 'UNKNOWN', message: 'Gagal memproses video' }
+        error: response.data.error || { 
+          code: 'UNKNOWN', 
+          message: response.data.message || 'Gagal memproses video' 
+        }
       });
     }
     else {
@@ -123,14 +129,25 @@ app.post('/api/tiktok/ttmp4', async (req, res) => {
     }
   } catch (error) {
     console.error('[TikTok MP4 Error]:', error.message);
-    // Pastikan mengirimkan error dengan struktur yang sama
-    res.status(500).json({ 
-      success: false, 
-      error: { 
-        code: 'SERVER_ERROR', 
-        message: 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.' 
-      }
-    });
+    // Cek apakah error dari axios memiliki response
+    if (error.response && error.response.data) {
+      // Kirim error dari API ke frontend
+      res.status(error.response.status || 400).json({
+        success: false,
+        error: error.response.data.error || { 
+          code: 'API_ERROR', 
+          message: error.response.data.message || 'Terjadi kesalahan pada API'
+        }
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: { 
+          code: 'SERVER_ERROR', 
+          message: 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.' 
+        }
+      });
+    }
   }
 });
 
@@ -148,10 +165,13 @@ app.post('/api/tiktok/ttmp3', async (req, res) => {
         'Content-Type': 'application/json',
         'x-api-key': process.env.API_KEY
       },
-      timeout: 30000
+      timeout: 30000,
+      validateStatus: function(status) {
+        return status < 500;
+      }
     });
 
-    if (response.data && response.data.success) {
+    if (response.status === 200 && response.data && response.data.success === true) {
       const data = response.data.data;
       const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}&type=mp3`;
       
@@ -160,10 +180,13 @@ app.post('/api/tiktok/ttmp3', async (req, res) => {
         data: { ...data, download_url: proxyUrl, preview_url: proxyUrl }
       });
     } 
-    else if (response.data && !response.data.success) {
-      res.status(400).json({
+    else if (response.data && response.data.success === false) {
+      res.status(response.status || 400).json({
         success: false,
-        error: response.data.error || { code: 'UNKNOWN', message: 'Gagal memproses audio' }
+        error: response.data.error || { 
+          code: 'UNKNOWN', 
+          message: response.data.message || 'Gagal memproses audio' 
+        }
       });
     }
     else {
@@ -171,10 +194,23 @@ app.post('/api/tiktok/ttmp3', async (req, res) => {
     }
   } catch (error) {
     console.error('[TikTok MP3 Error]:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      error: { code: 'SERVER_ERROR', message: 'Terjadi kesalahan pada server. Silakan coba lagi.' }
-    });
+    if (error.response && error.response.data) {
+      res.status(error.response.status || 400).json({
+        success: false,
+        error: error.response.data.error || { 
+          code: 'API_ERROR', 
+          message: error.response.data.message || 'Terjadi kesalahan pada API'
+        }
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: { 
+          code: 'SERVER_ERROR', 
+          message: 'Terjadi kesalahan pada server. Silakan coba lagi.' 
+        }
+      });
+    }
   }
 });
 
@@ -192,13 +228,15 @@ app.post('/api/tiktok/ttphoto', async (req, res) => {
         'Content-Type': 'application/json',
         'x-api-key': process.env.API_KEY
       },
-      timeout: 30000
+      timeout: 30000,
+      validateStatus: function(status) {
+        return status < 500;
+      }
     });
 
-    if (response.data && response.data.success) {
+    if (response.status === 200 && response.data && response.data.success === true) {
       const data = response.data.data;
       
-      // Konversi semua image URLs ke proxy
       if (data.images && data.images.length > 0) {
         data.images = data.images.map(img => {
           const filename = img.split('/').pop().split('?')[0];
@@ -209,10 +247,13 @@ app.post('/api/tiktok/ttphoto', async (req, res) => {
       
       res.json({ success: true, data: data });
     } 
-    else if (response.data && !response.data.success) {
-      res.status(400).json({
+    else if (response.data && response.data.success === false) {
+      res.status(response.status || 400).json({
         success: false,
-        error: response.data.error || { code: 'UNKNOWN', message: 'Gagal memproses foto' }
+        error: response.data.error || { 
+          code: 'UNKNOWN', 
+          message: response.data.message || 'Gagal memproses foto' 
+        }
       });
     }
     else {
@@ -220,10 +261,23 @@ app.post('/api/tiktok/ttphoto', async (req, res) => {
     }
   } catch (error) {
     console.error('[TikTok Photo Error]:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      error: { code: 'SERVER_ERROR', message: 'Terjadi kesalahan pada server. Silakan coba lagi.' }
-    });
+    if (error.response && error.response.data) {
+      res.status(error.response.status || 400).json({
+        success: false,
+        error: error.response.data.error || { 
+          code: 'API_ERROR', 
+          message: error.response.data.message || 'Terjadi kesalahan pada API'
+        }
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: { 
+          code: 'SERVER_ERROR', 
+          message: 'Terjadi kesalahan pada server. Silakan coba lagi.' 
+        }
+      });
+    }
   }
 });
 
