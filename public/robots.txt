@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://tiktok.danuxy.com/sitemap.xml
-Host: https://tiktok.danuxy.com
+Sitemap: https://ttdl.danuxy.com/sitemap.xml
+Host: https://ttdl.danuxy.com
 Crawl-delay: 1
