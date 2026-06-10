@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>
+            Danuxy Studio | TikTok Downloader - Download Video TikTok Tanpa
+            Watermark
+        </title>
+        <meta
+            name="description"
+            content="Danuxy Studio - Download video TikTok tanpa watermark, audio MP3, dan foto slide. Gratis, cepat, aman, tanpa registrasi. Kualitas HD 1080p."
+        />
+        <meta
+            name="keywords"
+            content="Danuxy Studio, TikTok Downloader, download TikTok, download video TikTok, TikTok MP3, TikTok slideshow, Danuxy TikTok"
+        />
+        <meta name="author" content="Danuxy Studio" />
+        <meta name="robots" content="index, follow" />
+        <meta name="googlebot" content="index, follow" />
+
+        <link rel="canonical" href="https://tiktok.danuxy.com/" />
+        <link rel="icon" type="image/png" href="/assets/logo.png" />
+
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tiktok.danuxy.com/" />
+        <meta
+            property="og:title"
+            content="Danuxy Studio - TikTok Downloader Tanpa Watermark"
+        />
+        <meta
+            property="og:description"
+            content="Download video TikTok tanpa watermark, audio MP3, dan foto slide. Gratis, cepat, aman."
+        />
+        <meta
+            property="og:image"
+            content="https://tiktok.danuxy.com/assets/banner.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+            media="print"
+            onload="this.media = 'all'"
+        />
+
+        <link rel="stylesheet" href="/css/style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fab fa-tiktok"></i></div>
+                    <h1 class="logo-text">Danuxy<span>Studio</span></h1>
+                </div>
+                <p class="tagline">
+                    TikTok Downloader • Tanpa Watermark • 1080p HD
+                </p>
+            </div>
+
+            <!-- Download Card -->
+            <div class="card">
+                <div class="input-group">
+                    <i class="fab fa-tiktok input-icon"></i>
+                    <input
+                        type="text"
+                        id="urlInput"
+                        class="url-input"
+                        placeholder="Tempel link TikTok di sini..."
+                    />
+                    <button class="clear-btn" id="clearBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="badge-wrapper">
+                    <div class="badge">
+                        <i class="fas fa-crown"></i>
+                        <span>Tanpa Watermark • Kualitas HD</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-video" id="btnVideo">
+                        <i class="fas fa-download"></i> Download Video
+                        <i class="fab fa-tiktok"></i>
+                    </button>
+                    <button class="btn btn-audio" id="btnAudio">
+                        <i class="fas fa-download"></i> Download Audio
+                        <i class="fas fa-music"></i>
+                    </button>
+                    <button class="btn btn-photo" id="btnPhoto">
+                        <i class="fas fa-images"></i> Download Foto
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="loading-card hidden">
+                <div class="spinner"></div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="loading-text">
+                    <i class="fas fa-spinner fa-pulse"></i> Memproses permintaan
+                    Anda...
+                </p>
+            </div>
+
+            <!-- Result -->
+            <div id="result"></div>
+
+            <!-- How to Use -->
+            <div class="card howto-card">
+                <div class="howto-header">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>Cara Menggunakan TikTok Downloader</h3>
+                </div>
+                <div class="howto-list">
+                    <div class="howto-item">
+                        <div class="howto-num">1</div>
+                        <div class="howto-text">
+                            <i class="fab fa-tiktok"></i> Salin link video
+                            TikTok dari aplikasi TikTok
+                        </div>
+                    </div>
+                    <div class="howto-item">
+                        <div class="howto-num">2</div>
+                        <div class="howto-text">
+                            <i class="fas fa-paste"></i> Tempel link di kolom
+                            input di atas
+                        </div>
+                    </div>
+                    <div class="howto-item">
+                        <div class="howto-num">3</div>
+                        <div class="howto-text">
+                            <i class="fas fa-video"></i> Pilih: Download Video,
+                            Audio, atau Foto
+                        </div>
+                    </div>
+                    <div class="howto-item">
+                        <div class="howto-num">4</div>
+                        <div class="howto-text">
+                            <i class="fas fa-save"></i> Tunggu proses dan simpan
+                            file
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fab fa-tiktok"></i><span>Tanpa Watermark</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-video"></i><span>1080p HD</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-music"></i><span>MP3 Audio</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-images"></i><span>Download Foto</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bolt"></i><span>Cepat</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i><span>Aman</span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <button class="donate-btn" id="donateBtn">
+                    <i class="fas fa-heart"></i> Dukung Danuxy Studio
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div class="social-links">
+                    <a
+                        href="https://whatsapp.com/channel/0029Vb6RsCAEAKWDFTrHdu0L"
+                        target="_blank"
+                        aria-label="WhatsApp"
+                        ><i class="fab fa-whatsapp"></i
+                    ></a>
+                    <a
+                        href="https://github.com/Danuxy-Studio"
+                        target="_blank"
+                        aria-label="GitHub"
+                        ><i class="fab fa-github"></i
+                    ></a>
+                </div>
+                <p class="copyright">
+                    © 2026 Danuxy Studio • TikTok Downloader • Dibuat dengan
+                    <i class="fas fa-heart" style="color: #ff3366"></i>
+                </p>
+            </div>
+        </div>
+
+        <!-- Donation Modal -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3>
+                    <i class="fas fa-heart" style="color: #ff3366"></i> Dukung
+                    Danuxy Studio
+                </h3>
+                <p>
+                    Dukungan Anda membuat layanan ini tetap berjalan dan gratis
+                    untuk semua orang!
+                </p>
+                <a
+                    href="https://sociabuzz.com/nuxy_mc/tribe"
+                    target="_blank"
+                    class="modal-btn"
+                    ><i class="fas fa-heart"></i> Donasi via Sociabuzz
+                    <i class="fas fa-external-link-alt"></i
+                ></a>
+            </div>
+        </div>
+
+        <script src="/js/main.js" defer></script>
+    </body>
+</html>
