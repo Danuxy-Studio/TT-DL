@@ -284,8 +284,8 @@
           ${suggestion ? `<br><span class="error-suggestion">${escapeHtml(suggestion)}</span>` : ''}
           <br><br>
           <span class="error-contact">
-            <i class="fab fa-whatsapp"></i> Hubungi: 
-            <a href="https://whatsapp.com/channel/0029Vb6RsCAEAKWDFTrHdu0L" target="_blank">WhatsApp</a>
+             Hubungi: 
+            <i class="fab fa-whatsapp"></i><a href="https://whatsapp.com/channel/0029Vb6RsCAEAKWDFTrHdu0L" target="_blank">WhatsApp</a>
             <span class="separator">•</span>
             <i class="fab fa-github"></i> 
             <a href="https://github.com/Danuxy-Studio" target="_blank">GitHub</a>

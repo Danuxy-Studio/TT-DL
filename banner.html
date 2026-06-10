@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danuxy Studio - Premium Component Media</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Reset dasar untuk layout fleksibel/responsif */
+    html, body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    * {
+      box-sizing: inherit;
+    }
+    
+    body {
+      background-color: #0a0a0f; /* Menyesuaikan body websitemu */
+      /* Efek ambient glow disesuaikan dengan warna neon cyan & magenta websitemu */
+      background-image: 
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 79, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 85% 20%, rgba(0, 242, 234, 0.12) 0%, transparent 60%),
+        linear-gradient(145deg, #0a0a0f 0%, #13131a 100%);
+      font-family: 'Inter', -apple-system, sans-serif;
+      position: relative;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Garis aksen kiri - Diubah ke gradasi warna websitemu (Cyan ke Pink/Magenta) */
+    .accent-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+      background: linear-gradient(180deg, #00f2ea 0%, #ff004f 100%);
+      box-shadow: 6px 0 30px rgba(0, 242, 234, 0.3);
+      z-index: 3;
+    }
+
+    /* Watermark TikTok raksasa dengan warna cyan transparan */
+    .bg-watermark {
+      position: absolute;
+      right: 4%;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 32vw;
+      color: rgba(0, 242, 234, 0.02);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    /* Tata Letak Utama Container */
+    .container {
+      position: relative;
+      z-index: 2;
+      padding: 60px 40px 60px 80px;
+      max-width: 1200px;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    
+    /* Logo Brand Section */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 45px;
+    }
+    
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #00f2ea, #ff004f); /* Sesuai .logo-icon web */
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: white;
+      box-shadow: 0 10px 25px rgba(0, 242, 234, 0.3);
+    }
+    
+    .logo-text {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #c084fc, #ec4899); /* Sesuai .logo-text web */
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .logo-text span {
+      color: #a78bfa; /* Sesuai .logo-text span web */
+      background: none;
+      -webkit-background-clip: unset;
+      font-weight: 500;
+      margin-left: 2px;
+    }
+    
+    /* Content Area */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .badge-container {
+      margin-bottom: 5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 242, 234, 0.1); /* Sesuai .badge web */
+      border: 1px solid rgba(0, 242, 234, 0.2);
+      padding: 7px 18px;
+      border-radius: 100px;
+    }
+    
+    .badge i {
+      color: #00f2ea;
+      font-size: 11px;
+    }
+    
+    .badge span {
+      color: #00f2ea;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+    
+    h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: -1.5px;
+      margin-bottom: 4px;
+    }
+    
+    .h1-gradient {
+      background: linear-gradient(135deg, #ffffff 40%, #e2e8f0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .h1-purple {
+      background: linear-gradient(135deg, #c084fc, #ec4899); /* Senada dengan teks logo web */
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .desc {
+      font-size: 20px;
+      color: #a1a1aa; /* Sesuai .loading-text web */
+      line-height: 1.6;
+      max-width: 720px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    
+    /* Fitur Chips */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1c1c26; /* Sesuai .feature web */
+      border: 1px solid #2a2a35;
+      padding: 8px 18px;
+      border-radius: 100px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .feature i {
+      color: #00f2ea; /* Icon cyan */
+      font-size: 13px;
+    }
+    
+    .feature span {
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Area Call to Action (CTA) */
+    .cta-zone {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 24px;
+      margin-top: 15px;
+    }
+    
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #00f2ea, #004e9e); /* Sesuai .btn-video web */
+      padding: 14px 34px;
+      border-radius: 100px;
+      box-shadow: 0 8px 20px rgba(0, 242, 234, 0.2);
+    }
+    
+    .cta-btn i, .cta-btn span {
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    
+    .cta-btn i.fa-arrow-right {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    
+    .free-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .free-badge i {
+      color: #10b981; /* Sesuai .audio-info i web (green) */
+      font-size: 16px;
+    }
+    
+    .free-badge span {
+      color: #71717a; /* Sesuai .tagline web */
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Footer Section */
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      padding-top: 24px;
+      border-top: 1px solid #1f1f2a; /* Sesuai border card web */
+      width: 100%;
+      margin-top: auto;
+    }
+    
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .footer-item i {
+      color: #00f2ea;
+      font-size: 12px;
+    }
+    
+    .footer-item span {
+      color: #71717a;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Tambahan Responsif HP agar rapi seperti file asal */
+    @media (max-width: 480px) {
+      .container {
+        padding: 40px 20px 40px 40px;
+      }
+      .cta-zone {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .cta-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="accent-bar"></div>
+  
+  <div class="bg-watermark"><i class="fab fa-tiktok"></i></div>
+  
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="fab fa-tiktok"></i>
+      </div>
+      <div class="logo-text">Danuxy<span>Studio</span></div>
+    </div>
+    
+    <div class="content-area">
+      <div class="badge-container">
+        <div class="badge">
+          <i class="fas fa-bolt"></i>
+          <span>HIGH-SPEED TIKTOK DOWNLOADER</span>
+        </div>
+      </div>
+      
+      <h1>
+        <span class="h1-gradient">Download TikTok Media</span><br>
+        <span class="h1-purple">No Watermark HD Quality</span>
+      </h1>
+      
+      <p class="desc">
+        Unduh video tanpa watermark, musik MP3 kualitas tinggi, atau foto klip galeri Slideshow TikTok secara instan. Aman, tanpa batas, dan gratis selamanya.
+      </p>
+      
+      <div class="features">
+        <div class="feature"><i class="fas fa-video"></i><span>MP4 HD Clean</span></div>
+        <div class="feature"><i class="fas fa-music"></i><span>MP3 High-Bitrate</span></div>
+        <div class="feature"><i class="fas fa-images"></i><span>Slideshow Grid</span></div>
+        <div class="feature"><i class="fas fa-shield-alt"></i><span>Secure SSL Encrypted</span></div>
+        <div class="feature"><i class="fas fa-infinity"></i><span>Unlimited Usage</span></div>
+      </div>
+
+      <div class="cta-zone">
+        <div class="cta-btn">
+          <i class="fas fa-link"></i>
+          <span>Paste URL & Download Now</span>
+          <i class="fas fa-arrow-right"></i>
+        </div>
+        <div class="free-badge">
+          <i class="fas fa-check-circle"></i>
+          <span>No Registration Required</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="footer-item"><i class="fas fa-star"></i><span>Auto Match Best Quality</span></div>
+      <div class="footer-item"><i class="fas fa-cloud"></i><span>Cloud-Based Process</span></div>
+      <div class="footer-item"><i class="fas fa-mobile-alt"></i><span>Mobile & Desktop Friendly</span></div>
+    </div>
+  </div>
+
+</body>
+</html>
