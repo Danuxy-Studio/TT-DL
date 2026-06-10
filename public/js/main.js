@@ -132,28 +132,34 @@
     
     let html = '<div class="result-card">';
     
-    // Video Preview
+    // Video Preview - bisa diputar langsung
     if (isVideo && data.download_url) {
       html += `
-        <div class="video-preview-container" onclick="window.open('${data.download_url}', '_blank')">
-          <video class="video-preview" muted autoplay loop playsinline disablePictureInPicture>
+        <div class="video-preview-container">
+          <video class="video-preview" controls muted autoplay loop playsinline disablePictureInPicture>
             <source src="${data.download_url}" type="video/mp4">
             Browser tidak support video preview.
           </video>
-          <div class="video-preview-control"><i class="fas fa-play"></i> Preview • Klik untuk download</div>
+          <div class="video-preview-control"><i class="fas fa-info-circle"></i> Preview video • Bisa langsung diputar</div>
         </div>
       `;
     }
     
-    // Audio Player untuk preview lagu (pakai proxy URL)
+    // Audio Player - bisa diputar langsung sebelum download
     if (isAudio && data.download_url) {
       html += `
         <div class="audio-player-container">
+          <div class="audio-player-header">
+            <i class="fas fa-music"></i>
+            <span>Preview Audio</span>
+          </div>
           <audio controls class="audio-preview" preload="metadata">
             <source src="${data.download_url}" type="audio/mpeg">
             Browser tidak support audio player.
           </audio>
-          <div class="audio-info"><i class="fas fa-headphones"></i> Preview lagu • Klik play untuk mendengarkan</div>
+          <div class="audio-info">
+            <i class="fas fa-headphones"></i> Klik play untuk mendengarkan sebelum download
+          </div>
         </div>
       `;
     }
@@ -176,7 +182,7 @@
       html += `<div class="file-info"><span><i class="fas fa-file"></i> ${escapeHtml(data.filename)}</span><span><i class="fas fa-download"></i> ${sizeMb}</span></div>`;
     }
     
-    // Download Link (sudah proxy)
+    // Download Link
     if (data.download_url) {
       const downloadText = isVideo ? 'Download Video (HD)' : (isAudio ? 'Download Audio MP3' : 'Download');
       html += `<a href="${data.download_url}" class="download-link" download target="_blank"><i class="fas fa-download"></i> ${downloadText}</a>`;
@@ -188,12 +194,6 @@
     resultDiv.innerHTML = html;
     resultDiv.classList.remove('hidden');
     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
-    // Autoplay video
-    setTimeout(() => {
-      const video = document.querySelector('.video-preview');
-      if (video) video.play().catch(e => console.log('Auto-play prevented'));
-    }, 100);
   }
   
   function renderPhotoResult(data) {
@@ -214,13 +214,11 @@
       </div>
     `;
     
-    // Images Grid dengan tombol download per gambar (sudah proxy)
+    // Images Grid dengan tombol download per gambar
     if (images.length > 0) {
       html += `<div class="slideshow-section">`;
       html += `<div class="slideshow-grid">`;
       images.forEach((img, idx) => {
-        // Extract file extension untuk menentukan tipe
-        const ext = img.includes('.jpg') ? 'jpg' : (img.includes('.png') ? 'png' : 'jpg');
         html += `
           <div class="slideshow-card">
             <img src="${img}" alt="Photo ${idx + 1}" loading="lazy">

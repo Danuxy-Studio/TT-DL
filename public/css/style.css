@@ -250,7 +250,6 @@ body {
   overflow: hidden;
   background: #1c1c26;
   position: relative;
-  cursor: pointer;
 }
 
 .video-preview {
@@ -258,6 +257,7 @@ body {
   max-height: 280px;
   object-fit: contain;
   background: #000;
+  outline: none;
 }
 
 .video-preview-control {
@@ -272,30 +272,55 @@ body {
   pointer-events: none;
 }
 
-/* Audio Player */
+/* Audio Player - Premium Style */
 .audio-player-container {
-  background: #1c1c26;
-  border-radius: 60px;
-  padding: 12px 16px;
+  background: linear-gradient(135deg, #1c1c26, #13131a);
+  border-radius: 20px;
+  padding: 16px;
   margin-bottom: 1rem;
+  border: 1px solid rgba(0,242,234,0.2);
+}
+
+.audio-player-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,242,234,0.1);
+}
+
+.audio-player-header i {
+  color: #00f2ea;
+  font-size: 1rem;
+}
+
+.audio-player-header span {
+  font-size: 0.7rem;
+  color: #a1a1aa;
+  font-weight: 500;
 }
 
 .audio-preview {
-  flex: 1;
-  min-width: 180px;
-  height: 40px;
+  width: 100%;
+  height: 45px;
+  margin-bottom: 8px;
+  border-radius: 30px;
+  background: #1c1c26;
 }
 
 .audio-info {
-  font-size: 0.65rem;
-  color: #a1a1aa;
+  font-size: 0.6rem;
+  color: #6b7280;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  margin-top: 6px;
+}
+
+.audio-info i {
+  color: #10b981;
 }
 
 /* Result */
@@ -753,13 +778,46 @@ body {
 
 /* Responsive */
 @media (max-width: 480px) {
-  .container { padding: 1rem; }
-  .card { padding: 1rem; }
-  .button-group { flex-direction: column; gap: 0.6rem; }
-  .features-grid { grid-template-columns: repeat(2, 1fr); }
-  .slideshow-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .slideshow-card img { height: 100px; }
-  .video-preview { max-height: 200px; }
-  .audio-player-container { flex-direction: column; align-items: stretch; }
-  .audio-preview { width: 100%; }
+  .container {
+    padding: 1rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .slideshow-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .slideshow-card img {
+    height: 100px;
+  }
+  
+  .video-preview {
+    max-height: 200px;
+  }
+  
+  /* Audio Player Mobile Fix */
+  .audio-player-container {
+    padding: 12px;
+  }
+  
+  .audio-preview {
+    height: 40px;
+  }
+  
+  .audio-info {
+    font-size: 0.55rem;
+  }
 }
