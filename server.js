@@ -5,12 +5,11 @@ const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const compression = require('compression');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ============ SECURITY & PERFORMANCE ============
+// Security & Performance
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -18,19 +17,18 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
-      imgSrc: ["'self'", "data:", "https:", "http:", "https://p16-common-sign.tiktokcdn-us.com", "https://p19-common-sign.tiktokcdn-us.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      mediaSrc: ["'self'", "blob:", "data:", "https:"], // Penting untuk audio/video
       connectSrc: ["'self'", "https://api.danuxy.com"],
-      frameSrc: ["'none'"],
-      objectSrc: ["'none'"]
+      frameSrc: ["'none'"]
     }
   }
 }));
 
-app.use(compression({ level: 9, threshold: 0 }));
 app.use(cors());
 app.use(express.json());
 
-// Static files dengan cache
+// Static files
 app.use(express.static('public', {
   maxAge: '1y',
   setHeaders: (res, filePath) => {
@@ -40,55 +38,59 @@ app.use(express.static('public', {
   }
 }));
 
-// ============ RATE LIMITING (Anti Spam & Anti DDOS) ============
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 50,
-  message: { success: false, message: 'Too many requests, please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/', limiter);
-
-// IP-based rate limiting untuk extra protection
-const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  message: { success: false, message: 'Too many requests from this IP.' }
-});
-app.use('/api/', globalLimiter);
-
-// ============ PROXY DOWNLOAD (CORS bypass) ============
+// ============ PROXY DOWNLOAD - Download langsung dari server ============
 app.get('/api/download', async (req, res) => {
   try {
-    const { url } = req.query;
+    const { url, type } = req.query;
     if (!url) return res.status(400).json({ success: false, message: 'URL required' });
+    
+    console.log(`[PROXY] Downloading: ${url.substring(0, 100)}...`);
+    
+    // Set header yang benar untuk file
+    let contentType = 'application/octet-stream';
+    if (type === 'mp4' || url.includes('.mp4')) contentType = 'video/mp4';
+    if (type === 'mp3' || url.includes('.mp3')) contentType = 'audio/mpeg';
+    if (type === 'jpg' || type === 'jpeg' || url.includes('.jpg')) contentType = 'image/jpeg';
+    if (type === 'png' || url.includes('.png')) contentType = 'image/png';
     
     const response = await axios({
       method: 'GET',
       url: url,
       responseType: 'stream',
       timeout: 60000,
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
     });
     
     const filename = url.split('/').pop().split('?')[0];
+    res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Accept-Ranges', 'bytes');
+    
     response.data.pipe(res);
   } catch (error) {
+    console.error('[PROXY Error]:', error.message);
     res.status(500).json({ success: false, message: 'Download failed' });
   }
 });
 
-// ============ API ENDPOINTS ============
-// TikTok Video Download (MP4)
+// Rate limiting untuk anti spam
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { success: false, message: 'Too many requests' }
+});
+app.use('/api/', limiter);
+
+// ============ TIKTOK API ENDPOINTS ============
 app.post('/api/tiktok/ttmp4', async (req, res) => {
   try {
     const { url, quality } = req.body;
-    if (!url) return res.status(400).json({ success: false, message: 'URL is required' });
+    if (!url) return res.status(400).json({ success: false, message: 'URL required' });
 
-    console.log(`[TikTok MP4] Request: ${url}, Quality: ${quality || '1080p'}`);
+    console.log(`[TikTok MP4] Request: ${url}`);
 
     const response = await axios.post(`${process.env.API_BASE_URL}/ttmp4`, {
       url: url,
@@ -103,13 +105,14 @@ app.post('/api/tiktok/ttmp4', async (req, res) => {
 
     if (response.data && response.data.success) {
       const data = response.data.data;
-      const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}`;
+      const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}&type=mp4`;
       
       res.json({
         success: true,
         data: {
           ...data,
-          download_url: proxyUrl
+          download_url: proxyUrl,
+          preview_url: proxyUrl
         }
       });
     } else {
@@ -117,15 +120,14 @@ app.post('/api/tiktok/ttmp4', async (req, res) => {
     }
   } catch (error) {
     console.error('[TikTok MP4 Error]:', error.message);
-    res.status(500).json({ success: false, message: error.message || 'Failed to process video' });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// TikTok Audio Download (MP3)
 app.post('/api/tiktok/ttmp3', async (req, res) => {
   try {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ success: false, message: 'URL is required' });
+    if (!url) return res.status(400).json({ success: false, message: 'URL required' });
 
     console.log(`[TikTok MP3] Request: ${url}`);
 
@@ -141,13 +143,14 @@ app.post('/api/tiktok/ttmp3', async (req, res) => {
 
     if (response.data && response.data.success) {
       const data = response.data.data;
-      const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}`;
+      const proxyUrl = `/api/download?url=${encodeURIComponent(data.download_url)}&type=mp3`;
       
       res.json({
         success: true,
         data: {
           ...data,
-          download_url: proxyUrl
+          download_url: proxyUrl,
+          preview_url: proxyUrl
         }
       });
     } else {
@@ -155,15 +158,14 @@ app.post('/api/tiktok/ttmp3', async (req, res) => {
     }
   } catch (error) {
     console.error('[TikTok MP3 Error]:', error.message);
-    res.status(500).json({ success: false, message: error.message || 'Failed to process audio' });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// TikTok Photo/Slideshow Download
 app.post('/api/tiktok/ttphoto', async (req, res) => {
   try {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ success: false, message: 'URL is required' });
+    if (!url) return res.status(400).json({ success: false, message: 'URL required' });
 
     console.log(`[TikTok Photo] Request: ${url}`);
 
@@ -178,19 +180,33 @@ app.post('/api/tiktok/ttphoto', async (req, res) => {
     });
 
     if (response.data && response.data.success) {
-      res.json(response.data);
+      const data = response.data.data;
+      
+      // Konversi semua image URLs ke proxy
+      if (data.images && data.images.length > 0) {
+        data.images = data.images.map(img => {
+          const filename = img.split('/').pop().split('?')[0];
+          const ext = filename.split('.').pop();
+          return `/api/download?url=${encodeURIComponent(img)}&type=${ext}`;
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: data
+      });
     } else {
       throw new Error(response.data?.message || 'Failed to process slideshow');
     }
   } catch (error) {
     console.error('[TikTok Photo Error]:', error.message);
-    res.status(500).json({ success: false, message: error.message || 'Failed to process slideshow' });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString(), service: 'TikTok Downloader' });
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // SEO Routes
@@ -208,7 +224,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Danuxy Studio TikTok Downloader running on http://localhost:${PORT}`);
-  console.log(`🔒 Anti-spam: ${process.env.RATE_LIMIT_MAX_REQUESTS} requests per ${process.env.RATE_LIMIT_WINDOW_MS/1000}s`);
-  console.log(`📹 Endpoints: /api/tiktok/ttmp4, /api/tiktok/ttmp3, /api/tiktok/ttphoto`);
+  console.log(`🚀 TikTok Downloader running on http://localhost:${PORT}`);
+  console.log(`🔒 Anti-spam: 50 requests per 15 minutes`);
 });
