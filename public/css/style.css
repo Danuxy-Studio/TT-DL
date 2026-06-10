@@ -396,6 +396,7 @@ body {
   color: #6b7280;
 }
 
+/* Tambahan di bagian error */
 .error {
   background: rgba(239,68,68,0.1);
   border: 1px solid #ef4444;
@@ -407,6 +408,16 @@ body {
   color: #fca5a5;
   font-size: 0.75rem;
   margin-bottom: 1rem;
+}
+
+.error strong {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.error i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 /* Slideshow */

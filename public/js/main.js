@@ -120,7 +120,7 @@
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
+    if (!res.ok || !data.success) throw new Error(data.error?.message || data.message || 'Request failed');
     return data.data;
   }
   
@@ -132,7 +132,7 @@
     
     let html = '<div class="result-card">';
     
-    // Video Preview - bisa diputar langsung
+    // Video Preview
     if (isVideo && data.download_url) {
       html += `
         <div class="video-preview-container">
@@ -145,7 +145,7 @@
       `;
     }
     
-    // Audio Player - bisa diputar langsung sebelum download
+    // Audio Player
     if (isAudio && data.download_url) {
       html += `
         <div class="audio-player-container">
@@ -214,7 +214,7 @@
       </div>
     `;
     
-    // Images Grid dengan tombol download per gambar
+    // Images Grid
     if (images.length > 0) {
       html += `<div class="slideshow-section">`;
       html += `<div class="slideshow-grid">`;
@@ -242,8 +242,37 @@
     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
   
-  function displayError(msg) {
-    resultDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div><strong>Error</strong><br>${escapeHtml(msg)}</div></div>`;
+  function displayError(msg, errorDetail = null) {
+    let errorMessage = msg;
+    let suggestion = '';
+    
+    // Cek apakah ini error karena salah tipe konten
+    if (errorDetail && errorDetail.code === 'PHOTO_URL') {
+      errorMessage = 'Link ini adalah SLIDESHOW (foto). Gunakan tombol "Download Foto" untuk mengunduh gambar-gambarnya.';
+      suggestion = 'Coba klik tombol "Download Foto" di atas.';
+    } else if (errorDetail && errorDetail.code === 'VIDEO_URL') {
+      errorMessage = 'Link ini adalah VIDEO. Gunakan tombol "Download Video" untuk mengunduh videonya.';
+      suggestion = 'Coba klik tombol "Download Video" di atas.';
+    } else if (errorDetail && errorDetail.code === 'SERVER_ERROR') {
+      errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.';
+      suggestion = 'Jika error terus terjadi, hubungi kami melalui media sosial di bawah.';
+    } else if (errorDetail && errorDetail.code === 'UNKNOWN') {
+      errorMessage = errorDetail.message || 'Terjadi kesalahan. Silakan coba lagi.';
+    }
+    
+    let html = `
+      <div class="error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Error</strong><br>
+          ${escapeHtml(errorMessage)}
+          ${suggestion ? `<br><span style="font-size:0.65rem;">${escapeHtml(suggestion)}</span>` : ''}
+          <br><span style="font-size:0.6rem; color:#6b7280;">Jika masalah berlanjut, hubungi kami melalui WhatsApp atau GitHub di footer.</span>
+        </div>
+      </div>
+    `;
+    
+    resultDiv.innerHTML = html;
     resultDiv.classList.remove('hidden');
   }
   
@@ -266,7 +295,17 @@
       completeProgress();
       setTimeout(() => {
         showLoading(false);
-        displayError(err.message);
+        // Cek apakah err.message mengandung struktur error dari API
+        let errorDetail = null;
+        try {
+          // err.message mungkin berupa string JSON dari API
+          if (err.message && err.message.includes('code')) {
+            errorDetail = JSON.parse(err.message);
+          }
+        } catch(e) {
+          // ignore
+        }
+        displayError(err.message, errorDetail);
         isProcessing = false;
       }, 500);
     }
@@ -291,7 +330,13 @@
       completeProgress();
       setTimeout(() => {
         showLoading(false);
-        displayError(err.message);
+        let errorDetail = null;
+        try {
+          if (err.message && err.message.includes('code')) {
+            errorDetail = JSON.parse(err.message);
+          }
+        } catch(e) {}
+        displayError(err.message, errorDetail);
         isProcessing = false;
       }, 500);
     }
